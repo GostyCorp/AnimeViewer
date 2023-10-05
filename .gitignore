@@ -1,0 +1,8 @@
+Setup_AnimeViewer/
+.idea/
+.vs/
+AnimeViewerTest/
+bin/
+obj/
+*.user
+packages/

@@ -11,11 +11,3 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
-
-Setup_AnimeViewer/
-.idea/
-.vs/
-AnimeViewerTest/
-bin/
-obj/
-*.user
