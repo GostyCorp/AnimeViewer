@@ -1,0 +1,24 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        x:Class="AnimeViewer.MainWindow"
+        Title="MainWindow" Height="810" Width="1440" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+	<Grid Background="#FF3C3C3C">
+		<ui:TitleBar x:Name="TitleBar" Height="30" FontFamily="Century Gothic" FontSize="14" ScrollViewer.VerticalScrollBarVisibility="Disabled" FontWeight="Bold" Title="AnimeViewers" Padding="8,0,0,0" VerticalAlignment="Top"/>
+		<StackPanel x:Name="Panel" Width="180" Margin="0,30,1260,0" Height="780">
+			<ui:Button IsEnabled="False" Content="User" Height="40" Width="170" Margin="0,20,0,0" FontFamily="Century Gothic" HorizontalAlignment="Center" Click="UserPageBtn_Click"/>
+			<ui:Button IsEnabled="False" Content="Favorite" Height="40" Width="170" Margin="0,10,0,0" FontFamily="Century Gothic" HorizontalAlignment="Center" Click="FavPageBtn_Click"/>
+			<ui:TextBox x:Name="Search" Icon="Search16" Height="40" Width="170" Margin="0,10,0,0" IconPlacement="Right" TextChanged="Search_OnTextChanged" VerticalAlignment="Center" MinHeight="35" Padding="5,4,5,0"  />
+			<TreeView AllowDrop="True" Height="100" Width="170" Margin="0,10,0,0" FontFamily="Century Gothic" HorizontalAlignment="Center">
+				<TreeViewItem Header="Animes" IsExpanded="True">
+					<TreeViewItem IsEnabled="False" Header="Sommaire" PreviewMouseLeftButtonUp="AniSomBtn_PreviewMouseLeftButtonUp"/>
+					<TreeViewItem Header="VF" PreviewMouseLeftButtonUp="AniVfBtn_PreviewMouseLeftButtonUp"/>
+					<TreeViewItem Header="VOSTFR" PreviewMouseLeftButtonUp="AniVostFrBtn_PreviewMouseLeftButtonUp"/>
+				</TreeViewItem>
+			</TreeView>
+		</StackPanel>
+		<Frame x:Name="PageViewer" Margin="180,30,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+	</Grid>
+</Window>
+
