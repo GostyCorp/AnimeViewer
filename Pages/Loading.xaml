@@ -6,9 +6,9 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:local="clr-namespace:AnimeViewer.Pages"
         mc:Ignorable="d"
-        Title="Loading" Height="450" Width="800" WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize">
+        Title="Loading" Height="450" Width="800" WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize" Topmost="True">
 	<Grid Background="#FF3C3C3C">
-		<ProgressBar Name="Progress" Height="50" Margin="10" Foreground="#FF08FF00" />
-		<TextBlock Name="StatusText" Text="Loading" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" />
+		<ProgressBar x:Name="Progress" Height="50" Margin="10" Foreground="#FF08FF00" />
+		<TextBlock Text="Loading" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" />
 	</Grid>
 </Window>

@@ -19,6 +19,7 @@ namespace AnimeViewer.Utils
 {
 	public abstract class NekoSamaScrap
 	{
+		private static Loading _loading;
 		public static void Init()
 		{
 			InitAsync();
@@ -26,21 +27,19 @@ namespace AnimeViewer.Utils
 
 		private async static void InitAsync()
 		{
-			Loading loading = new Loading();
-			loading.Show();
+			_loading = new Loading();
+			_loading.Show();
+			MainWindow main = (MainWindow)Application.Current.MainWindow;
 
 			await Task.Run(() =>
 			{
-				loading.SetProgress(25);
+				main?.Dispatcher.Invoke(() => main?.Hide());
 				SetAnimeDataNekoSama(GetNekoSamaScraps("vf"), Type.Vf);
-				loading.Dispatcher.Invoke(() => loading.SetProgress(75));
 				SetAnimeDataNekoSama(GetNekoSamaScraps("vostfr"), Type.Vostfr);
-				loading.Dispatcher.Invoke(() => loading.SetProgress(100));
+				main?.Dispatcher.Invoke(() => main?.Show());
 			});
 
-			loading.Close();
-			MainWindow mainWindow = (MainWindow)Application.Current.MainWindow;
-			mainWindow?.Show();
+			_loading.Close();
 		}
 
 		private static string WebAccess(Uri url)
@@ -79,6 +78,8 @@ namespace AnimeViewer.Utils
 
 		private static void SetAnimeDataNekoSama(List<AnimeNekoSama> list, Type type)
 		{
+			double pas = (double)50 / list.Count;
+			double progress = _loading.Dispatcher.Invoke(() => _loading.Progress.Value);
 			foreach(AnimeNekoSama animeNekoSama in list)
 			{
 				bool exist = false;
@@ -92,6 +93,7 @@ namespace AnimeViewer.Utils
 					if(liteDataReader["urlVF"] != DBNull.Value && type == Type.Vf || liteDataReader["urlVostFr"] != DBNull.Value && type == Type.Vostfr)
 						urlExist = true;
 				}
+				_loading.Dispatcher.Invoke(() => _loading.SetProgress(progress += pas));
 				if(urlExist)
 					continue;
 
@@ -132,6 +134,9 @@ namespace AnimeViewer.Utils
 		public static void GetEpisodeScrapingNekoSama(Serie serie, Type type)
 		{
 			HtmlNodeCollection nodes = Data.GetScrapWebSite(type == Type.Vf ? serie.UrlVf : serie.UrlVostFr, "//script[@type='text/javascript']");
+			if(nodes == null)
+				return;
+
 			Match match = Regex.Match(nodes[1].InnerHtml, @"var episodes = (.*);");
 			string listEpisodes = match.Success ? match.Groups[1].Value : null;
 
@@ -164,6 +169,9 @@ namespace AnimeViewer.Utils
 					continue;
 
 				HtmlNodeCollection script = Data.GetScrapWebSite($"https://neko-sama.fr{episodeNekoSama.Url}", "//script[@type='text/javascript']");
+				if(script == null)
+					return;
+
 				Match match = Regex.Match(script[2].InnerHtml, @"video\[0\]\s*=\s*'([^']*)';");
 				episode.Url = match.Success ? match.Groups[1].Value : null;
 

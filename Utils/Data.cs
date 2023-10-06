@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.SQLite;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Windows;
 using System.Windows.Documents;
 using AnimeViewer.Models;
 using HtmlAgilityPack;
@@ -32,7 +33,6 @@ namespace AnimeViewer.Utils
 			if(File.Exists("animeViewer.db"))
 			{
 				OpenSqLite();
-				NekoSamaScrap.Init();
 				return;
 			}
 
@@ -46,8 +46,6 @@ namespace AnimeViewer.Utils
 			sql = $"create table Episode(id integer not null constraint Episode_pk primary key autoincrement, serie integer not null, number integer not null, type text not null, url text, urlImage text, constraint Episode_pk2 unique (number, serie, type));";
 			liteCommand = new SQLiteCommand(sql, Sqlite);
 			liteCommand.ExecuteNonQuery();
-
-			NekoSamaScrap.Init();
 		}
 
 		private static void OpenSqLite()
@@ -93,6 +91,13 @@ namespace AnimeViewer.Utils
 		public static HtmlNodeCollection GetScrapWebSite(string url, string xPath)
 		{
 			HtmlWeb webClient = new HtmlWeb();
+			Uri.TryCreate(url, UriKind.Absolute, out Uri uriResult);
+			if(uriResult == null)
+			{
+				MessageBox.Show("La série est indisponible", "Erreur de chargement de la série", MessageBoxButton.OK, MessageBoxImage.Error);
+				return null;
+			}
+
 			HtmlDocument document = webClient.Load(url);
 			return document?.DocumentNode.SelectNodes(xPath);
 		}
@@ -102,7 +107,7 @@ namespace AnimeViewer.Utils
 			OpenSqLite();
 			List<Serie> series = new List<Serie>();
 			string sql = type == Type.Vf ? "SELECT * FROM Serie WHERE urlVF IS NOT NULL" : "SELECT * FROM Serie WHERE urlVostFr IS NOT NULL";
-			sql += search != null ? " AND title LIKE @search OR titleEnglish LIKE @search OR titleRomanji LIKE @search OR titleFrench LIKE @search OR titleOther LIKE @search" : "";
+			sql += search != null ? " AND (title LIKE @search OR titleEnglish LIKE @search OR titleRomanji LIKE @search OR titleFrench LIKE @search OR titleOther LIKE @search)" : "";
 			sql += " limit @limit offset @lastLimit;";
 			Dictionary<string, object> dictionary = new Dictionary<string, object>()
 			{
