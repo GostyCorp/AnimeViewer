@@ -41,12 +41,48 @@ namespace AnimeViewer.Pages
 		private async void PlayerWeb_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
 		{
 			await PlayerWeb.CoreWebView2.ExecuteScriptAsync(@"
-		        setTimeout(function() {
+				AnimeViewerJS = function()
+				{
+					// Fullscreen
 				    const bridge = chrome.webview.hostObjects.bridge;
-				    document.getElementsByClassName('jw-icon-fullscreen')[1].addEventListener('click', function() {
-				        bridge.FullScreenStatus();
+				    document.getElementsByClassName('jw-icon-fullscreen')[1].addEventListener('click', function()
+				    {
+				        bridge.FullScreenToggle();
 				    });
-				}, 3000);
+					document.addEventListener('keydown', function(event)
+					{
+					    if(event.key === ""Escape"")
+						{
+					        bridge.FullScreenToggle();
+					    }
+					});
+					
+					// Remove ads
+					let anchorElements = document.body.querySelectorAll('a');
+					anchorElements.forEach(function(anchorElement)
+					{
+					    anchorElement.remove();
+					});
+					let scriptElements = document.body.querySelectorAll('script');
+					if(scriptElements.length > 0)
+					{
+					    scriptElements[scriptElements.length - 1].remove();
+					}
+					
+					// Auto play
+					jwplayer().play();
+					jwplayer().setVolume(50);
+				}
+				
+				for(let i = 0; i < 3; i++)
+				{
+					let time = i*1000+500;
+					setTimeout(function() 
+					{
+						if(jwplayer().getState() !== 'playing')
+							AnimeViewerJS();
+					}, time);
+				}
 		    ");
 		}
 	}
@@ -62,7 +98,7 @@ namespace AnimeViewer.Pages
 			_window = window;
 		}
 
-		public void FullScreenStatus()
+		public void FullScreenToggle()
 		{
 			_window.Dispatcher.Invoke(() => { _window.WindowState = _window.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized; });
 			_window.TitleBar.Visibility = _window.WindowState == WindowState.Maximized ? Visibility.Hidden : Visibility.Visible;

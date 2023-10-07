@@ -1,0 +1,27 @@
+<Page x:Class="AnimeViewer.Pages.EpisodeListPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:AnimeViewer.Pages"
+      mc:Ignorable="d"
+      Title="EpisodeListPage" Width="1260" Height="780">
+	<Grid>
+		<ScrollViewer x:Name="ViewerScroll" VerticalScrollBarVisibility="Visible" Height="780" Width="1260">
+			<StackPanel>
+				<ItemsControl x:Name="EpisodeListView" ItemsSource="{Binding}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<local:EpisodeFicheView DataContext="{Binding}"/>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<WrapPanel/>
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+				</ItemsControl>
+			</StackPanel>
+		</ScrollViewer>
+	</Grid>
+</Page>

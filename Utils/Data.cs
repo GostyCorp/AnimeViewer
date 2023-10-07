@@ -108,7 +108,7 @@ namespace AnimeViewer.Utils
 			List<Serie> series = new List<Serie>();
 			string sql = type == Type.Vf ? "SELECT * FROM Serie WHERE urlVF IS NOT NULL" : "SELECT * FROM Serie WHERE urlVostFr IS NOT NULL";
 			sql += search != null ? " AND (title LIKE @search OR titleEnglish LIKE @search OR titleRomanji LIKE @search OR titleFrench LIKE @search OR titleOther LIKE @search)" : "";
-			sql += " limit @limit offset @lastLimit;";
+			sql += " ORDER BY title limit @limit offset @lastLimit;";
 			Dictionary<string, object> dictionary = new Dictionary<string, object>()
 			{
 				{ "@limit", limit },
@@ -167,7 +167,7 @@ namespace AnimeViewer.Utils
 		{
 			OpenSqLite();
 			List<Episode> episodes = new List<Episode>();
-			string sql = $"SELECT * FROM Episode WHERE serie = @serie AND type = @type;";
+			string sql = $"SELECT * FROM Episode WHERE serie = @serie AND type = @type ORDER BY number;";
 			Dictionary<string, object> dictionary = new Dictionary<string, object>()
 			{
 				{ "@serie", serie.Id },

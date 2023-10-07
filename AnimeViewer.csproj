@@ -114,6 +114,12 @@
     <Compile Include="Models\Film.cs" />
     <Compile Include="Models\Serie.cs" />
     <Compile Include="Models\User.cs" />
+    <Compile Include="Pages\EpisodeFicheView.xaml.cs">
+      <DependentUpon>EpisodeFicheView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\EpisodeListPage.xaml.cs">
+      <DependentUpon>EpisodeListPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\FicheView.xaml.cs">
       <DependentUpon>FicheView.xaml</DependentUpon>
     </Compile>
@@ -143,6 +149,8 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Pages\EpisodeFicheView.xaml" />
+    <Page Include="Pages\EpisodeListPage.xaml" />
     <Page Include="Pages\FicheView.xaml" />
     <Page Include="Pages\ListPage.xaml">
       <SubType>Designer</SubType>

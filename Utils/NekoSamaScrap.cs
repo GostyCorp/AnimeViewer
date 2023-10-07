@@ -20,6 +20,7 @@ namespace AnimeViewer.Utils
 	public abstract class NekoSamaScrap
 	{
 		private static Loading _loading;
+		private static MainWindow _main;
 		public static void Init()
 		{
 			InitAsync();
@@ -29,14 +30,14 @@ namespace AnimeViewer.Utils
 		{
 			_loading = new Loading();
 			_loading.Show();
-			MainWindow main = (MainWindow)Application.Current.MainWindow;
+			_main = (MainWindow)Application.Current.MainWindow;
 
 			await Task.Run(() =>
 			{
-				main?.Dispatcher.Invoke(() => main?.Hide());
+				_main?.Dispatcher.Invoke(() => _main?.Hide());
 				SetAnimeDataNekoSama(GetNekoSamaScraps("vf"), Type.Vf);
 				SetAnimeDataNekoSama(GetNekoSamaScraps("vostfr"), Type.Vostfr);
-				main?.Dispatcher.Invoke(() => main?.Show());
+				_main?.Dispatcher.Invoke(() => _main?.Show());
 			});
 
 			_loading.Close();
@@ -80,22 +81,16 @@ namespace AnimeViewer.Utils
 		{
 			double pas = (double)50 / list.Count;
 			double progress = _loading.Dispatcher.Invoke(() => _loading.Progress.Value);
-			foreach(AnimeNekoSama animeNekoSama in list)
+			Parallel.ForEach(list, animeNekoSama =>
 			{
 				bool exist = false;
-				SQLiteDataReader liteDataReader = Data.GetData("select id, urlVF, urlVostFr from Serie where title = @title", new Dictionary<string, object>
-				{ { "@title", animeNekoSama.Title } });
-				bool urlExist = false;
+				SQLiteDataReader liteDataReader = Data.GetData("select id, urlVF, urlVostFr from Serie where title = @title", new Dictionary<string, object> { { "@title", animeNekoSama.Title } });
 				while(liteDataReader.Read())
 				{
 					animeNekoSama.Id = Convert.ToInt32(liteDataReader["id"]);
 					exist = true;
-					if(liteDataReader["urlVF"] != DBNull.Value && type == Type.Vf || liteDataReader["urlVostFr"] != DBNull.Value && type == Type.Vostfr)
-						urlExist = true;
 				}
 				_loading.Dispatcher.Invoke(() => _loading.SetProgress(progress += pas));
-				if(urlExist)
-					continue;
 
 				string sql;
 				Dictionary<string, object> dictionary;
@@ -109,9 +104,16 @@ namespace AnimeViewer.Utils
 							{ "@url", animeNekoSama.Url }
 						};
 						Data.SetData(sql, dictionary);
-						continue;
-					case true:
-						continue;
+						return;
+					case true when type == Type.Vf:
+						sql = "update Serie set urlVF = @url where id = @id;";
+						dictionary = new Dictionary<string, object>
+						{
+							{ "@id", animeNekoSama.Id },
+							{ "@url", animeNekoSama.Url }
+						};
+						Data.SetData(sql, dictionary);
+						return;
 				}
 
 				sql = type == Type.Vf ? "insert into Serie (title, titleEnglish, titleRomanji, titleFrench, titleOther, urlVF, urlImage, genre) values (@title, @titleEnglish, @titleRomanji, @titleFrench, @titleOther, @url, @urlImage, @genre);" :
@@ -128,10 +130,10 @@ namespace AnimeViewer.Utils
 					{ "@genre", animeNekoSama.Genres }
 				};
 				Data.SetData(sql, dictionary);
-			}
+			});
 		}
 
-		public static void GetEpisodeScrapingNekoSama(Serie serie, Type type)
+		public async static Task GetEpisodeScrapingNekoSamaAsync(Serie serie, Type type)
 		{
 			HtmlNodeCollection nodes = Data.GetScrapWebSite(type == Type.Vf ? serie.UrlVf : serie.UrlVostFr, "//script[@type='text/javascript']");
 			if(nodes == null)
@@ -144,29 +146,30 @@ namespace AnimeViewer.Utils
 				return;
 
 			List<EpisodeNekoSama> episodeNekoSamas = JsonConvert.DeserializeObject<List<EpisodeNekoSama>>(listEpisodes);
-			SetEpisodeDataNekoSama(episodeNekoSamas, serie, type);
+
+			_loading = new Loading();
+			_loading.Show();
+			await Task.Run(() => SetEpisodeDataNekoSama(episodeNekoSamas, serie, type));
+			_loading.Close();
 		}
 
 		private static void SetEpisodeDataNekoSama(List<EpisodeNekoSama> list, Serie serie, Type type)
 		{
-			foreach(EpisodeNekoSama episodeNekoSama in list)
+			double pas = (double)100 / list.Count;
+			double progress = _loading.Dispatcher.Invoke(() => _loading.Progress.Value);
+			Parallel.ForEach(list, episodeNekoSama =>
 			{
 				Episode episode = new Episode(serie, episodeNekoSama.Num, type, episodeNekoSama.Url, episodeNekoSama.UrlImage);
 				bool exist = false;
 
-				SQLiteDataReader liteDataReader = Data.GetData("select id, url from Episode where serie = @serie AND number = @number AND type = @type", new Dictionary<string, object>
-				{ { "@serie", serie.Id }, { "@number", episodeNekoSama.Num }, { "@type", type } });
+				SQLiteDataReader liteDataReader = Data.GetData("select id, url from Episode where serie = @serie AND number = @number AND type = @type", new Dictionary<string, object> { { "@serie", serie.Id }, { "@number", episodeNekoSama.Num }, { "@type", type } });
 
-				bool episodeExist = false;
 				while(liteDataReader.Read())
 				{
 					episode.Id = Convert.ToInt32(liteDataReader["id"]);
 					exist = true;
-					if(liteDataReader["url"] != DBNull.Value)
-						episodeExist = true;
 				}
-				if(episodeExist)
-					continue;
+				_loading.Dispatcher.Invoke(() => _loading.SetProgress(progress += pas));
 
 				HtmlNodeCollection script = Data.GetScrapWebSite($"https://neko-sama.fr{episodeNekoSama.Url}", "//script[@type='text/javascript']");
 				if(script == null)
@@ -202,7 +205,7 @@ namespace AnimeViewer.Utils
 						Data.SetData(sql, dictionary);
 						break;
 				}
-			}
+			});
 		}
 	}
 

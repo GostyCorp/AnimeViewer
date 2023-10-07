@@ -8,16 +8,11 @@
 	mc:Ignorable="d"
 	d:DesignHeight="200"
 	d:DesignWidth="200">
-	<Grid>
-		<Button Click="Button_Click">
-			<StackPanel Orientation="Vertical" Background="#FF464646" Height="200" Width="200" HorizontalAlignment="Center" VerticalAlignment="Center">
-				<Image Source="{Binding UrlImage}" Width="200" Height="150" />
-				<Label VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="50">
-					<StackPanel>
-						<Label Content="{Binding Title}" />
-						<Label Content="{Binding Number}" />
-					</StackPanel>
-				</Label>
+	<Grid Width="200" Height="200">
+		<Button Click="Button_Click" Padding="0,0,0,0">
+			<StackPanel Orientation="Vertical" Height="200" Width="200" Background="#00000000">
+				<Image Source="{Binding UrlImage}" Width="180" Height="130" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,10,10,10" />
+				<TextBlock Text="{Binding Title}" FontFamily="Century Gothic" FontSize="12" TextAlignment="Center" TextWrapping="Wrap" Width="200" Height="50" Padding="10, 0, 10, 10" Foreground="#FFFDFDFD"/>
 				<ui:NumberBox x:Name="IdNumber" Text="{Binding Id}" TextWrapping="Wrap" Min="0" Max="100000" IntegersOnly="True" Visibility="Hidden" />
 			</StackPanel>
 		</Button>

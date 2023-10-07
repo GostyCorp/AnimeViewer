@@ -4,7 +4,7 @@
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         x:Class="AnimeViewer.MainWindow"
         Title="MainWindow" Height="810" Width="1440" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
-	<Grid Background="#FF3C3C3C">
+	<Grid Background="#FF323232">
 		<ui:TitleBar x:Name="TitleBar" Height="30" FontFamily="Century Gothic" FontSize="14" ScrollViewer.VerticalScrollBarVisibility="Disabled" FontWeight="Bold" Title="AnimeViewers" Padding="8,0,0,0" VerticalAlignment="Top"/>
 		<StackPanel x:Name="Panel" Width="180" Margin="0,30,1260,0" Height="780">
 			<WrapPanel Height="40" Width="180" Margin="0,20,0,0">
@@ -18,7 +18,7 @@
 				<ComboBoxItem Content="VF" IsSelected="True"/>
 				<ComboBoxItem Content="VostFr"/>
 			</ComboBox>
-			<ui:TextBox x:Name="Search" TextChanged="Search_OnTextChanged" Icon="Search16" Height="40" Width="170" Margin="0,10,0,0" IconPlacement="Right" VerticalAlignment="Center" MinHeight="35" Padding="5,4,5,0"  />
+			<ui:TextBox x:Name="Search" TextChanged="Search_OnTextChanged" Icon="Search16" Height="40" Width="170" Margin="0,10,0,0" IconPlacement="Right" VerticalAlignment="Center" MinHeight="35" Padding="5,4,5,0" FontFamily="Century Gothic"  />
 		</StackPanel>
 		<Frame x:Name="PageViewer" Margin="180,30,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
 	</Grid>
