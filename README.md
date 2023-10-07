@@ -32,6 +32,7 @@
 - [x] Application Initial (Lecture des animes en deux langues : VF et VOSTFR, sous une source : neko-sama.fr).
   - Validé à la version 0.2.0
 - [ ] Ajout d'un compte utilisateur (Favoris, Historique, etc...).
+- [ ] Meilleur design.
 - [ ] Ajout de plusieurs sources.
 - [ ] Ajout de plusieurs langues.
 - [ ] Ajout d'un lecteur vidéo.
