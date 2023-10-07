@@ -4,7 +4,7 @@
     <img src="https://github.com/VeryOldpApY/AnimeViewer/assets/12466017/64298ee8-f549-4981-bf2c-303b1887d8f1" alt="Logo" width="320" height="320">
   </a>
 
-<h3 align="center">AnimeViewer</h3>
+<h1 align="center">AnimeViewer</h1>
   <p align="center">
     Application vous permettant de regarder des animes en streaming (VF/VOSTFR).
     <br />
