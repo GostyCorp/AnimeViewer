@@ -17,6 +17,8 @@
 
 <!-- ABOUT THE PROJECT -->
 ## A propos du projet
+Application uniquement disponible sur Windows actuellement.
+
 ![image](https://github.com/VeryOldpApY/AnimeViewer/assets/12466017/5f6285d3-0add-4bfc-ad75-9af6129506cf)
 
 ### Installation
