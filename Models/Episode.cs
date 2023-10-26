@@ -59,10 +59,11 @@ namespace AnimeViewer.Models
 			SQLiteDataReader data = Data.GetData(sql, dictionary);
 			while(data.Read())
 			{
+				Langage langage = Convert.ToInt32(data["type"]) == 0 ? Langage.Vostfr : Langage.Vf;
 				episode = new Episode(
-					serie: Serie.GetSerie(Convert.ToInt32(data["Serie"])),
+					serie: Serie.GetSerie(id: Convert.ToInt32(data["Serie"]), langage: langage),
 					number: Convert.ToInt32(data["number"]),
-					langage: Convert.ToInt32(data["type"]) == 0 ? Langage.Vostfr : Langage.Vf,
+					langage: langage,
 					url: data["url"].ToString(),
 					urlImage: data["urlImage"].ToString(),
 					id: Convert.ToInt32(data["id"])

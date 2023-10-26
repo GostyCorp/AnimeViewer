@@ -88,7 +88,8 @@ namespace AnimeViewer.Utils
 						urlVf: liteDataReader["urlVF"].ToString(),
 						urlVostFr: liteDataReader["urlVostFr"].ToString(),
 						urlImage: liteDataReader["urlImage"].ToString(),
-						genre: liteDataReader["genre"].ToString()
+						genre: liteDataReader["genre"].ToString(),
+						langage: langage
 					);
 				}
 				_loading.Dispatcher.Invoke(() => _loading.SetProgress(progress += pas));

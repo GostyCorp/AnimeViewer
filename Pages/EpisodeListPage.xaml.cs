@@ -19,7 +19,7 @@ namespace AnimeViewer.Pages
 		public async Task LoadEpisodesAsync(int id, Langage langage)
 		{
 			_episodes.Clear();
-			Serie serie = Serie.GetSerie(id);
+			Serie serie = Serie.GetSerie(id: id, langage: langage);
 			if(serie == null)
 				return;
 

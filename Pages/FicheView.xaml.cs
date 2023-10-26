@@ -8,6 +8,7 @@ namespace AnimeViewer.Pages
 	{
 		private readonly MainWindow _main;
 		private Serie _serie;
+
 		public FicheView()
 		{
             InitializeComponent();
@@ -17,7 +18,7 @@ namespace AnimeViewer.Pages
         private async void Button_Click(object sender, RoutedEventArgs e)
 		{
 			_main.SwitchFrameView(MainWindow.FrameType.EpisodeList);
-			await _main.EpisodeListPage.LoadEpisodesAsync(id: _serie.Id, _main.Langage);
+			await _main.EpisodeListPage.LoadEpisodesAsync(id: _serie.Id, _serie.Langage);
 		}
 
 		private void FicheView_OnLoaded(object sender, RoutedEventArgs e)

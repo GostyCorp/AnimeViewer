@@ -17,8 +17,9 @@ namespace AnimeViewer.Models
 		public string UrlVostFr { get; set; }
 		public string UrlImage { get; set; }
 		public string Genre { get; set; }
+		public Langage Langage { get; set; }
 
-		public Serie(int id, string title, string titleEnglish, string titleRomanji, string titleFrench, string titleOther, string urlVf, string urlVostFr, string urlImage, string genre)
+		public Serie(int id, string title, string titleEnglish, string titleRomanji, string titleFrench, string titleOther, string urlVf, string urlVostFr, string urlImage, string genre, Langage langage)
 		{
 			Id = id;
 			Title = title;
@@ -30,6 +31,7 @@ namespace AnimeViewer.Models
 			UrlVostFr = urlVostFr;
 			UrlImage = urlImage;
 			Genre = genre;
+			Langage = langage;
 		}
 
 		public static List<Serie> GetSeries(int limit, int lastLimit, Langage langage, string search = null)
@@ -58,14 +60,15 @@ namespace AnimeViewer.Models
 	                    urlVf: data["urlVF"].ToString(),
 	                    urlVostFr: data["urlVostFr"].ToString(),
 						urlImage:  data["urlImage"].ToString(),
-	                    genre: data["genre"].ToString()
+	                    genre: data["genre"].ToString(),
+						langage: langage
 					)
 				);
 			}
 			return series;
 		}
 
-		public static Serie GetSerie(int id)
+		public static Serie GetSerie(int id, Langage langage)
 		{
 			Serie serie = null;
 			string sql = "SELECT * FROM Serie WHERE id = @id;";
@@ -86,7 +89,9 @@ namespace AnimeViewer.Models
 					urlVf: data["urlVF"].ToString(),
 					urlVostFr: data["urlVostFr"].ToString(),
 					urlImage: data["urlImage"].ToString(),
-					genre: data["genre"].ToString());
+					genre: data["genre"].ToString(),
+					langage: langage
+				);
 			}
 			return serie;
 		}
