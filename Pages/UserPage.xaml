@@ -1,9 +1,0 @@
-﻿<Page
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" x:Class="AnimeViewer.Pages.UserPage"
-      Title="UserPage" Width="1260" Height="780">
-	<Grid>
-		<ui:Button x:Name="Button" Content="Button" Margin="396,270,0,0" VerticalAlignment="Top" Height="199" Width="234" Background="Black" Foreground="White"/>
-	</Grid>
-</Page>
