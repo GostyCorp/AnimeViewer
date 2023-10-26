@@ -30,7 +30,6 @@ Application uniquement disponible sur Windows actuellement.
 
 <!-- ROADMAP -->
 ## Roadmap
-
 - [x] Application Initial (Lecture des animes en deux langues : VF et VOSTFR, sous une source : neko-sama.fr).
   - Validé à la version 0.2.0
 - [ ] Ajout d'un compte utilisateur (Favoris, Historique, etc...).
