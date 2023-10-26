@@ -5,7 +5,6 @@ using System.Windows.Controls;
 using AnimeViewer.Models;
 using AnimeViewer.Pages;
 using AnimeViewer.Utils;
-using MessageBox = System.Windows.MessageBox;
 using TextBox = Wpf.Ui.Controls.TextBox;
 
 namespace AnimeViewer
@@ -15,18 +14,18 @@ namespace AnimeViewer
 	/// </summary>
 	public partial class MainWindow
 	{
-		private readonly UserPage _userPage;
-		public readonly ListPage ListPage;
+		private readonly HistoryPage _historyPage;
+		private readonly ListPage _listPage;
 		public readonly EpisodeListPage EpisodeListPage;
 		private Player _player;
 
-		public Langage Langage { get; private set; } = Models.Langage.Vf;
+		public Langage Langage { get; private set; } = Langage.Vf;
 
 		public MainWindow()
 		{
 			InitializeComponent();
-			_userPage = new UserPage();
-			ListPage = new ListPage();
+			_historyPage = new HistoryPage();
+			_listPage = new ListPage();
 			EpisodeListPage = new EpisodeListPage();
 
 			bool isFirstRun = Convert.ToBoolean(ConfigurationManager.AppSettings["IsFirstRun"]);
@@ -62,12 +61,12 @@ namespace AnimeViewer
 			switch(frame)
 			{
 				case FrameType.Home:
-					PageViewer.Navigate(_userPage);
+					PageViewer.Navigate(_historyPage);
 					break;
 
 				case FrameType.SerieList:
-					PageViewer.Navigate(ListPage);
-					ListPage.ViewerScroll.ScrollToTop();
+					PageViewer.Navigate(_listPage);
+					_listPage.ViewerScroll.ScrollToTop();
 					break;
 
 				case FrameType.EpisodeList:
@@ -77,6 +76,11 @@ namespace AnimeViewer
 
 				case FrameType.Player:
 					PageViewer.Navigate(_player);
+					break;
+
+				case FrameType.History:
+					PageViewer.Navigate(_historyPage);
+					_historyPage.LoadHistory();
 					break;
 			}
 		}
@@ -96,13 +100,13 @@ namespace AnimeViewer
 
 		private void Search_OnTextChanged(object sender, TextChangedEventArgs e)
 		{
-			ListPage.Search = (sender as TextBox)?.Text;
-			if(ListPage.Search == null || ListPage.Search.Length < 3 && ListPage.Search != "")
+			_listPage.Search = (sender as TextBox)?.Text;
+			if(_listPage.Search == null || _listPage.Search.Length < 3 && _listPage.Search != "")
 				return;
 
 			SwitchFrameView(FrameType.SerieList);
-			ListPage.ClearSeries();
-			ListPage.LoadSeries();
+			_listPage.ClearSeries();
+			_listPage.LoadSeries();
 		}
 
 		private void ReloadBtn_OnClick(object sender, RoutedEventArgs e)
@@ -124,30 +128,35 @@ namespace AnimeViewer
 
 		private void TypeBox_OnDropDownClosed(object sender, EventArgs e)
 		{
-			if(!(sender is ComboBox comboBox))
+			if(sender is not ComboBox comboBox)
 				return;
 
 			switch(comboBox.SelectionBoxItem.ToString())
 			{
 				case "VostFr":
-					Langage = Models.Langage.Vostfr;
+					Langage = Langage.Vostfr;
 					break;
 				case "VF":
-					Langage = Models.Langage.Vf;
+					Langage = Langage.Vf;
 					break;
 			}
 
 			SwitchFrameView(FrameType.SerieList);
-			ListPage.ToggleType();
+			_listPage.ToggleType();
 		}
 
 		public enum FrameType
 		{
 			Home,
-			User,
+			History,
 			SerieList,
 			EpisodeList,
 			Player
+		}
+
+		private void HistoryBtn_OnClick(object sender, RoutedEventArgs e)
+		{
+			SwitchFrameView(FrameType.History);
 		}
 	}
 }
