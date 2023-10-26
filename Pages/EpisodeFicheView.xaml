@@ -14,7 +14,6 @@
 				<Image Source="{Binding UrlImage}" Width="200" Height="150" />
 				<Label Content="{Binding Number}" FontFamily="Century Gothic" FontSize="12" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="30" Foreground="#FFFDFDFD"/>
 				<ProgressBar x:Name="Progress" Visibility="Hidden" Margin="5,5,5,0" Height="5" Foreground="#FF00FFE2" />
-				<ui:NumberBox x:Name="IdNumber" Text="{Binding Id}" TextWrapping="Wrap" Min="0" Max="100000" IntegersOnly="True" Visibility="Hidden" />
 			</StackPanel>
 		</Button>
 	</Grid>

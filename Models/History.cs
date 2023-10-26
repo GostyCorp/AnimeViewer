@@ -9,7 +9,7 @@ namespace AnimeViewer.Models
 	public class History
 	{
 		private int Id { get; set; }
-		private Episode Episode { get; set; }
+		public Episode Episode { get; set; }
 		public float Time { get; set; }
 		public float MaxTime { get; set; }
 		public DateTime Date { get; set; }
@@ -56,7 +56,7 @@ namespace AnimeViewer.Models
 		public static List<History> GetListHistory()
 		{
 			List<History> histories = new List<History>();
-			const string sql = $"SELECT * FROM History;";
+			const string sql = $"SELECT * FROM History ORDER BY date DESC;";
 
 			SQLiteDataReader data = Data.GetData(sql);
 			while(data.Read())
