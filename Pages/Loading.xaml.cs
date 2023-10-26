@@ -1,20 +1,14 @@
-using System.Windows;
+namespace AnimeViewer.Pages;
 
-namespace AnimeViewer.Pages
+public partial class Loading
 {
-	public partial class Loading
+	public Loading()
 	{
-		public Loading()
-		{
-			InitializeComponent();
-		}
+		InitializeComponent();
+	}
 
-		public void SetProgress(double progress)
-		{
-			Dispatcher.Invoke(() =>
-			{
-				Progress.Value = progress;
-			});
-		}
+	public void SetProgress(double progress)
+	{
+		Dispatcher.Invoke(() => { Progress.Value = progress; });
 	}
 }

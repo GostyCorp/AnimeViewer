@@ -11,7 +11,7 @@
 		<Button Click="Button_Click" Padding="0,0,0,0">
 			<StackPanel Orientation="Vertical" Height="200" Width="200" Background="#00000000">
 				<Image Source="{Binding UrlImage}" Width="180" Height="130" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,10,10,10" />
-				<TextBlock Text="{Binding Title}" FontFamily="Century Gothic" FontSize="12" TextAlignment="Center" TextWrapping="Wrap" Width="200" Height="50" Padding="10, 0, 10, 10" Foreground="#FFFDFDFD"/>
+				<TextBlock Text="{Binding Title}" FontFamily="Century Gothic" FontSize="12" TextAlignment="Center" TextWrapping="Wrap" Width="200" Height="50" Padding="10, 0, 10, 10" Foreground="#FFFDFDFD" />
 			</StackPanel>
 		</Button>
 	</Grid>

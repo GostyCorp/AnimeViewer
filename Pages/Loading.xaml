@@ -8,6 +8,6 @@
 	<Grid Background="#FF3C3C3C">
 		<ProgressBar x:Name="Progress" Height="50" Margin="10" Foreground="#FF08FF00" />
 		<TextBlock Text="Loading" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" />
-		<Border BorderBrush="Black" BorderThickness="3"/>
+		<Border BorderBrush="Black" BorderThickness="3" />
 	</Grid>
 </Window>

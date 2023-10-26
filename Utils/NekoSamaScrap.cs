@@ -6,7 +6,6 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using AnimeViewer.Models;
@@ -14,66 +13,71 @@ using AnimeViewer.Pages;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
 
-namespace AnimeViewer.Utils
+namespace AnimeViewer.Utils;
+
+public abstract class NekoSamaScrap
 {
-	public abstract class NekoSamaScrap
+	private static Loading _loading;
+	private static MainWindow _main;
+
+	public static void Init()
 	{
-		private static Loading _loading;
-		private static MainWindow _main;
-		public static void Init()
-		{
-			InitAsync();
-		}
+		InitAsync();
+	}
 
-		private async static void InitAsync()
-		{
-			_loading = new Loading();
-			_loading.Show();
-			_main = (MainWindow)Application.Current.MainWindow;
+	private async static void InitAsync()
+	{
+		_loading = new Loading();
+		_loading.Show();
+		_main = (MainWindow)Application.Current.MainWindow;
 
-			await Task.Run(() =>
+		await Task.Run(
+			() =>
 			{
 				_main?.Dispatcher.Invoke(() => _main?.Hide());
-				SetAnimeDataNekoSama(GetNekoSamaScraps("vf"), Langage.Vf);
-				SetAnimeDataNekoSama(GetNekoSamaScraps("vostfr"), Langage.Vostfr);
+				SetAnimeDataNekoSama(list: GetNekoSamaScraps("vf"), Langage.Vf);
+				SetAnimeDataNekoSama(list: GetNekoSamaScraps("vostfr"), Langage.Vostfr);
 				_main?.Dispatcher.Invoke(() => _main?.Show());
-			});
+			}
+		);
 
-			_loading.Close();
-		}
+		_loading.Close();
+	}
 
-		private static string WebAccess(Uri url)
+	private static string WebAccess(Uri url)
+	{
+		ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
+		WebClient webClient = new WebClient
 		{
-			ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
-			WebClient webClient = new WebClient
-			{
-				Encoding = Encoding.UTF8
-			};
-			string web = webClient.DownloadString(url);
+			Encoding = Encoding.UTF8
+		};
+		string web = webClient.DownloadString(url);
 
-			return web;
-		}
+		return web;
+	}
 
-		private static List<AnimeNekoSama> GetNekoSamaScraps(string mode)
+	private static List<AnimeNekoSama> GetNekoSamaScraps(string mode)
+	{
+		Uri url = mode switch
 		{
-			Uri url = mode switch
-			{
-				"vf" => new Uri("https://185.146.232.127/animes-search-vf.json"),
-				"vostfr" => new Uri("https://185.146.232.127/animes-search-vostfr.json"),
-				_ => new Uri("https://185.146.232.127/animes-search-vf.json")
-			};
+			"vf" => new Uri("https://185.146.232.127/animes-search-vf.json"),
+			"vostfr" => new Uri("https://185.146.232.127/animes-search-vostfr.json"),
+			_ => new Uri("https://185.146.232.127/animes-search-vf.json")
+		};
 
-			string web = WebAccess(url);
-			return JsonConvert.DeserializeObject<List<AnimeNekoSama>>(web);
-		}
+		string web = WebAccess(url);
+		return JsonConvert.DeserializeObject<List<AnimeNekoSama>>(web);
+	}
 
-		private static void SetAnimeDataNekoSama(IReadOnlyCollection<AnimeNekoSama> list, Langage langage)
-		{
-			double pas = (double)50 / list.Count;
-			double progress = _loading.Dispatcher.Invoke(() => _loading.Progress.Value);
-			Parallel.ForEach(list, animeNekoSama =>
+	private static void SetAnimeDataNekoSama(IReadOnlyCollection<AnimeNekoSama> list, Langage langage)
+	{
+		double pas = (double)50 / list.Count;
+		double progress = _loading.Dispatcher.Invoke(() => _loading.Progress.Value);
+		Parallel.ForEach(
+			list,
+			animeNekoSama =>
 			{
-				SQLiteDataReader liteDataReader = Data.GetData("select * from Serie where title = @title", new Dictionary<string, object> { { "@title", animeNekoSama.Title } });
+				SQLiteDataReader liteDataReader = Data.GetData("select * from Serie where title = @title", dictionary: new Dictionary<string, object> { { "@title", animeNekoSama.Title } });
 				Serie serie = null;
 				while(liteDataReader.Read())
 				{
@@ -89,7 +93,7 @@ namespace AnimeViewer.Utils
 						urlVostFr: liteDataReader["urlVostFr"].ToString(),
 						urlImage: liteDataReader["urlImage"].ToString(),
 						genre: liteDataReader["genre"].ToString(),
-						langage: langage
+						langage
 					);
 				}
 				_loading.Dispatcher.Invoke(() => _loading.SetProgress(progress += pas));
@@ -119,8 +123,7 @@ namespace AnimeViewer.Utils
 						return;
 				}
 
-				sql = langage == Langage.Vf ? "insert into Serie (title, titleEnglish, titleRomanji, titleFrench, titleOther, urlVF, urlImage, genre) values (@title, @titleEnglish, @titleRomanji, @titleFrench, @titleOther, @url, @urlImage, @genre);" :
-									"insert into Serie (title, titleEnglish, titleRomanji, titleFrench, titleOther, urlVostFr, urlImage, genre) values (@title, @titleEnglish, @titleRomanji, @titleFrench, @titleOther, @url, @urlImage, @genre);";
+				sql = langage == Langage.Vf ? "insert into Serie (title, titleEnglish, titleRomanji, titleFrench, titleOther, urlVF, urlImage, genre) values (@title, @titleEnglish, @titleRomanji, @titleFrench, @titleOther, @url, @urlImage, @genre);" : "insert into Serie (title, titleEnglish, titleRomanji, titleFrench, titleOther, urlVostFr, urlImage, genre) values (@title, @titleEnglish, @titleRomanji, @titleFrench, @titleOther, @url, @urlImage, @genre);";
 				dictionary = new Dictionary<string, object>
 				{
 					{ "@title", animeNekoSama.Title },
@@ -133,39 +136,42 @@ namespace AnimeViewer.Utils
 					{ "@genre", animeNekoSama.Genres }
 				};
 				Data.SetData(sql, dictionary);
-			});
-		}
+			}
+		);
+	}
 
-		public async static Task GetEpisodeScrapingNekoSamaAsync(Serie serie, Langage langage)
-		{
-			HtmlNodeCollection nodes = Data.GetScrapWebSite(langage == Langage.Vf ? serie.UrlVf : serie.UrlVostFr, "//script[@type='text/javascript']");
-			if(nodes == null)
-				return;
+	public async static Task GetEpisodeScrapingNekoSamaAsync(Serie serie, Langage langage)
+	{
+		HtmlNodeCollection nodes = Data.GetScrapWebSite(url: langage == Langage.Vf ? serie.UrlVf : serie.UrlVostFr, "//script[@type='text/javascript']");
+		if(nodes == null)
+			return;
 
-			Match match = Regex.Match(nodes[1].InnerHtml, @"var episodes = (.*);");
-			string listEpisodes = match.Success ? match.Groups[1].Value : null;
+		Match match = Regex.Match(nodes[1].InnerHtml, @"var episodes = (.*);");
+		string listEpisodes = match.Success ? match.Groups[1].Value : null;
 
-			if(listEpisodes == null)
-				return;
+		if(listEpisodes == null)
+			return;
 
-			List<EpisodeNekoSama> episodeNekoSamas = JsonConvert.DeserializeObject<List<EpisodeNekoSama>>(listEpisodes);
+		List<EpisodeNekoSama> episodeNekoSamas = JsonConvert.DeserializeObject<List<EpisodeNekoSama>>(listEpisodes);
 
-			_loading = new Loading();
-			_loading.Show();
-			await Task.Run(() => SetEpisodeDataNekoSama(episodeNekoSamas, serie, langage));
-			_loading.Close();
-		}
+		_loading = new Loading();
+		_loading.Show();
+		await Task.Run(() => SetEpisodeDataNekoSama(episodeNekoSamas, serie, langage));
+		_loading.Close();
+	}
 
-		private static void SetEpisodeDataNekoSama(List<EpisodeNekoSama> list, Serie serie, Langage langage)
-		{
-			double pas = (double)100 / list.Count;
-			double progress = _loading.Dispatcher.Invoke(() => _loading.Progress.Value);
-			Parallel.ForEach(list, episodeNekoSama =>
+	private static void SetEpisodeDataNekoSama(List<EpisodeNekoSama> list, Serie serie, Langage langage)
+	{
+		double pas = (double)100 / list.Count;
+		double progress = _loading.Dispatcher.Invoke(() => _loading.Progress.Value);
+		Parallel.ForEach(
+			list,
+			episodeNekoSama =>
 			{
 				Episode episode = new Episode(serie, episodeNekoSama.Num, langage, episodeNekoSama.Url, episodeNekoSama.UrlImage);
 				bool exist = false;
 
-				SQLiteDataReader liteDataReader = Data.GetData("select id, url from Episode where serie = @serie AND number = @number AND type = @type", new Dictionary<string, object> { { "@serie", serie.Id }, { "@number", episodeNekoSama.Num }, { "@type", (int)langage } });
+				SQLiteDataReader liteDataReader = Data.GetData("select id, url from Episode where serie = @serie AND number = @number AND type = @type", dictionary: new Dictionary<string, object> { { "@serie", serie.Id }, { "@number", episodeNekoSama.Num }, { "@type", (int)langage } });
 
 				while(liteDataReader.Read())
 				{
@@ -174,7 +180,7 @@ namespace AnimeViewer.Utils
 				}
 				_loading.Dispatcher.Invoke(() => _loading.SetProgress(progress += pas));
 
-				HtmlNodeCollection script = Data.GetScrapWebSite($"https://neko-sama.fr{episodeNekoSama.Url}", "//script[@type='text/javascript']");
+				HtmlNodeCollection script = Data.GetScrapWebSite(url: $"https://neko-sama.fr{episodeNekoSama.Url}", "//script[@type='text/javascript']");
 				if(script == null)
 					return;
 
@@ -209,70 +215,70 @@ namespace AnimeViewer.Utils
 						Data.SetData(sql, dictionary);
 						break;
 				}
-			});
-		}
+			}
+		);
 	}
+}
 
-	public class AnimeNekoSama
+public class AnimeNekoSama
+{
+	[JsonConstructor]
+	[SuppressMessage("ReSharper", "InconsistentNaming")]
+	public AnimeNekoSama(int id, string title, string title_english, string title_romanji, string title_french, string others, string type, int status, float popularity, Uri url, string[] genres, Uri url_image, float score, string start_date_year, string nb_eps = null)
 	{
-		public int Id { get; set; }
-		public string Title { get; set; }
-		public string TitleEnglish { get; set; }
-		public string TitleRomanji { get; set; }
-		public string TitleFrench { get; set; }
-		public string Others { get; set; }
-		public string Type { get; set; }
-		public int Status { get; set; }
-		public float Popularity { get; set; }
-		public Uri Url { get; set; }
-		public string Genres { get; set; }
-		public Uri UrlImage { get; set; }
-		public float Score { get; set; }
-		public string StartDateYear { get; set; }
-		public string NbEps { get; set; }
-
-		[JsonConstructor]
-		[SuppressMessage("ReSharper", "InconsistentNaming")]
-		public AnimeNekoSama(int id, string title, string title_english, string title_romanji, string title_french, string others, string type, int status, float popularity, Uri url, string[] genres, Uri url_image, float score, string start_date_year, string nb_eps = null)
-		{
-			Id = id;
-			Title = title;
-			TitleEnglish = title_english;
-			TitleRomanji = title_romanji;
-			TitleFrench = title_french;
-			Others = others;
-			Type = type;
-			Status = status;
-			Popularity = popularity;
-			Url = new Uri($"https://neko-sama.fr{url}");
-			string genreFormatted = genres.Aggregate("[", (current, genre) => current + $"{genre}, ");
-			Genres = genreFormatted.Remove(genreFormatted.Length - 1) + "]";
-			UrlImage = url_image;
-			Score = score;
-			StartDateYear = start_date_year;
-			NbEps = nb_eps;
-		}
+		Id = id;
+		Title = title;
+		TitleEnglish = title_english;
+		TitleRomanji = title_romanji;
+		TitleFrench = title_french;
+		Others = others;
+		Type = type;
+		Status = status;
+		Popularity = popularity;
+		Url = new Uri($"https://neko-sama.fr{url}");
+		string genreFormatted = genres.Aggregate("[", (current, genre) => current + $"{genre}, ");
+		Genres = genreFormatted.Remove(genreFormatted.Length - 1) + "]";
+		UrlImage = url_image;
+		Score = score;
+		StartDateYear = start_date_year;
+		NbEps = nb_eps;
 	}
 
-	public class EpisodeNekoSama
+	public int Id { get; set; }
+	public string Title { get; set; }
+	public string TitleEnglish { get; set; }
+	public string TitleRomanji { get; set; }
+	public string TitleFrench { get; set; }
+	public string Others { get; set; }
+	public string Type { get; set; }
+	public int Status { get; set; }
+	public float Popularity { get; set; }
+	public Uri Url { get; set; }
+	public string Genres { get; set; }
+	public Uri UrlImage { get; set; }
+	public float Score { get; set; }
+	public string StartDateYear { get; set; }
+	public string NbEps { get; set; }
+}
+
+public class EpisodeNekoSama
+{
+	[JsonConstructor]
+	[SuppressMessage("ReSharper", "InconsistentNaming")]
+	public EpisodeNekoSama(string time, string episode, int num, string title, string url, string url_image)
 	{
-		public string Time { get; set; }
-		public string Episode { get; set; }
-		public int Num { get; set; }
-		public string Title { get; set; }
-		public string Url { get; set; }
-		public string UrlImage { get; set; }
-
-		[JsonConstructor]
-		[SuppressMessage("ReSharper", "InconsistentNaming")]
-		public EpisodeNekoSama(string time, string episode, int num, string title, string url, string url_image)
-		{
-			Time = time;
-			Episode = episode;
-			Num = num;
-			Title = title;
-			Url = url;
-			UrlImage = url_image;
-		}
+		Time = time;
+		Episode = episode;
+		Num = num;
+		Title = title;
+		Url = url;
+		UrlImage = url_image;
 	}
+
+	public string Time { get; set; }
+	public string Episode { get; set; }
+	public int Num { get; set; }
+	public string Title { get; set; }
+	public string Url { get; set; }
+	public string UrlImage { get; set; }
 }

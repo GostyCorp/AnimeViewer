@@ -1,30 +1,28 @@
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using AnimeViewer.Models;
 using AnimeViewer.Utils;
 
-namespace AnimeViewer.Pages
+namespace AnimeViewer.Pages;
+
+public partial class EpisodeListPage
 {
-	public partial class EpisodeListPage
+	private readonly ObservableCollection<Episode> _episodes = new ObservableCollection<Episode>();
+
+	public EpisodeListPage()
 	{
-		private readonly ObservableCollection<Episode> _episodes = new ObservableCollection<Episode>();
+		InitializeComponent();
+		EpisodeListView.DataContext = _episodes;
+	}
 
-		public EpisodeListPage()
-		{
-			InitializeComponent();
-			EpisodeListView.DataContext = _episodes;
-		}
+	public async Task LoadEpisodesAsync(int id, Langage langage)
+	{
+		_episodes.Clear();
+		Serie serie = Serie.GetSerie(id, langage);
+		if(serie == null)
+			return;
 
-		public async Task LoadEpisodesAsync(int id, Langage langage)
-		{
-			_episodes.Clear();
-			Serie serie = Serie.GetSerie(id: id, langage: langage);
-			if(serie == null)
-				return;
-
-			await NekoSamaScrap.GetEpisodeScrapingNekoSamaAsync(serie: serie, langage: langage);
-			Episode.GetEpisodes(serie, langage).ForEach(episode => _episodes.Add(episode));
-		}
+		await NekoSamaScrap.GetEpisodeScrapingNekoSamaAsync(serie, langage);
+		Episode.GetEpisodes(serie, langage).ForEach(episode => _episodes.Add(episode));
 	}
 }

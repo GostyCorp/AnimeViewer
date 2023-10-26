@@ -1,7 +1,5 @@
-namespace AnimeViewer.Models
+namespace AnimeViewer.Models;
+
+public class Film
 {
-	public class Film
-	{
-		
-	}
 }
