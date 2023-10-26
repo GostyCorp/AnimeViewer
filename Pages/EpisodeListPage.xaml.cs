@@ -6,7 +6,7 @@ using AnimeViewer.Utils;
 
 namespace AnimeViewer.Pages
 {
-	public partial class EpisodeListPage : Page
+	public partial class EpisodeListPage
 	{
 		private readonly ObservableCollection<Episode> _episodes = new ObservableCollection<Episode>();
 
@@ -16,15 +16,15 @@ namespace AnimeViewer.Pages
 			EpisodeListView.DataContext = _episodes;
 		}
 
-		public async Task LoadEpisodesAsync(int id, Type type)
+		public async Task LoadEpisodesAsync(int id, Langage langage)
 		{
 			_episodes.Clear();
-			Serie serie = Data.GetSerie(id);
+			Serie serie = Serie.GetSerie(id);
 			if(serie == null)
 				return;
 
-			await NekoSamaScrap.GetEpisodeScrapingNekoSamaAsync(serie: serie, type: type);
-			Data.GetEpisodes(serie, type).ForEach(episode => _episodes.Add(episode));
+			await NekoSamaScrap.GetEpisodeScrapingNekoSamaAsync(serie: serie, langage: langage);
+			Episode.GetEpisodes(serie, langage).ForEach(episode => _episodes.Add(episode));
 		}
 	}
 }

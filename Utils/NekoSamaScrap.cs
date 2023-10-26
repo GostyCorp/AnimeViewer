@@ -13,7 +13,6 @@ using AnimeViewer.Models;
 using AnimeViewer.Pages;
 using HtmlAgilityPack;
 using Newtonsoft.Json;
-using Type = AnimeViewer.Models.Type;
 
 namespace AnimeViewer.Utils
 {
@@ -35,8 +34,8 @@ namespace AnimeViewer.Utils
 			await Task.Run(() =>
 			{
 				_main?.Dispatcher.Invoke(() => _main?.Hide());
-				SetAnimeDataNekoSama(GetNekoSamaScraps("vf"), Type.Vf);
-				SetAnimeDataNekoSama(GetNekoSamaScraps("vostfr"), Type.Vostfr);
+				SetAnimeDataNekoSama(GetNekoSamaScraps("vf"), Langage.Vf);
+				SetAnimeDataNekoSama(GetNekoSamaScraps("vostfr"), Langage.Vostfr);
 				_main?.Dispatcher.Invoke(() => _main?.Show());
 			});
 
@@ -57,46 +56,48 @@ namespace AnimeViewer.Utils
 
 		private static List<AnimeNekoSama> GetNekoSamaScraps(string mode)
 		{
-			Uri url;
-			switch(mode)
+			Uri url = mode switch
 			{
-				case "vf":
-					url = new Uri("https://185.146.232.127/animes-search-vf.json");
-					break;
-
-				case "vostfr":
-					url = new Uri("https://185.146.232.127/animes-search-vostfr.json");
-					break;
-
-				default:
-					url = new Uri("https://185.146.232.127/animes-search-vf.json");
-					break;
-			}
+				"vf" => new Uri("https://185.146.232.127/animes-search-vf.json"),
+				"vostfr" => new Uri("https://185.146.232.127/animes-search-vostfr.json"),
+				_ => new Uri("https://185.146.232.127/animes-search-vf.json")
+			};
 
 			string web = WebAccess(url);
 			return JsonConvert.DeserializeObject<List<AnimeNekoSama>>(web);
 		}
 
-		private static void SetAnimeDataNekoSama(List<AnimeNekoSama> list, Type type)
+		private static void SetAnimeDataNekoSama(IReadOnlyCollection<AnimeNekoSama> list, Langage langage)
 		{
 			double pas = (double)50 / list.Count;
 			double progress = _loading.Dispatcher.Invoke(() => _loading.Progress.Value);
 			Parallel.ForEach(list, animeNekoSama =>
 			{
-				bool exist = false;
-				SQLiteDataReader liteDataReader = Data.GetData("select id, urlVF, urlVostFr from Serie where title = @title", new Dictionary<string, object> { { "@title", animeNekoSama.Title } });
+				SQLiteDataReader liteDataReader = Data.GetData("select * from Serie where title = @title", new Dictionary<string, object> { { "@title", animeNekoSama.Title } });
+				Serie serie = null;
 				while(liteDataReader.Read())
 				{
 					animeNekoSama.Id = Convert.ToInt32(liteDataReader["id"]);
-					exist = true;
+					serie = new Serie(
+						id: Convert.ToInt32(liteDataReader["id"]),
+						title: liteDataReader["title"].ToString(),
+						titleEnglish: liteDataReader["titleEnglish"].ToString(),
+						titleRomanji: liteDataReader["titleRomanji"].ToString(),
+						titleFrench: liteDataReader["titleFrench"].ToString(),
+						titleOther: liteDataReader["titleOther"].ToString(),
+						urlVf: liteDataReader["urlVF"].ToString(),
+						urlVostFr: liteDataReader["urlVostFr"].ToString(),
+						urlImage: liteDataReader["urlImage"].ToString(),
+						genre: liteDataReader["genre"].ToString()
+					);
 				}
 				_loading.Dispatcher.Invoke(() => _loading.SetProgress(progress += pas));
 
 				string sql;
 				Dictionary<string, object> dictionary;
-				switch(exist)
+				switch(serie)
 				{
-					case true when type == Type.Vostfr:
+					case not null when langage == Langage.Vostfr:
 						sql = "update Serie set urlVostFr = @url where id = @id;";
 						dictionary = new Dictionary<string, object>
 						{
@@ -105,7 +106,8 @@ namespace AnimeViewer.Utils
 						};
 						Data.SetData(sql, dictionary);
 						return;
-					case true when type == Type.Vf:
+
+					case not null when langage == Langage.Vf:
 						sql = "update Serie set urlVF = @url where id = @id;";
 						dictionary = new Dictionary<string, object>
 						{
@@ -116,7 +118,7 @@ namespace AnimeViewer.Utils
 						return;
 				}
 
-				sql = type == Type.Vf ? "insert into Serie (title, titleEnglish, titleRomanji, titleFrench, titleOther, urlVF, urlImage, genre) values (@title, @titleEnglish, @titleRomanji, @titleFrench, @titleOther, @url, @urlImage, @genre);" :
+				sql = langage == Langage.Vf ? "insert into Serie (title, titleEnglish, titleRomanji, titleFrench, titleOther, urlVF, urlImage, genre) values (@title, @titleEnglish, @titleRomanji, @titleFrench, @titleOther, @url, @urlImage, @genre);" :
 									"insert into Serie (title, titleEnglish, titleRomanji, titleFrench, titleOther, urlVostFr, urlImage, genre) values (@title, @titleEnglish, @titleRomanji, @titleFrench, @titleOther, @url, @urlImage, @genre);";
 				dictionary = new Dictionary<string, object>
 				{
@@ -133,9 +135,9 @@ namespace AnimeViewer.Utils
 			});
 		}
 
-		public async static Task GetEpisodeScrapingNekoSamaAsync(Serie serie, Type type)
+		public async static Task GetEpisodeScrapingNekoSamaAsync(Serie serie, Langage langage)
 		{
-			HtmlNodeCollection nodes = Data.GetScrapWebSite(type == Type.Vf ? serie.UrlVf : serie.UrlVostFr, "//script[@type='text/javascript']");
+			HtmlNodeCollection nodes = Data.GetScrapWebSite(langage == Langage.Vf ? serie.UrlVf : serie.UrlVostFr, "//script[@type='text/javascript']");
 			if(nodes == null)
 				return;
 
@@ -149,20 +151,20 @@ namespace AnimeViewer.Utils
 
 			_loading = new Loading();
 			_loading.Show();
-			await Task.Run(() => SetEpisodeDataNekoSama(episodeNekoSamas, serie, type));
+			await Task.Run(() => SetEpisodeDataNekoSama(episodeNekoSamas, serie, langage));
 			_loading.Close();
 		}
 
-		private static void SetEpisodeDataNekoSama(List<EpisodeNekoSama> list, Serie serie, Type type)
+		private static void SetEpisodeDataNekoSama(List<EpisodeNekoSama> list, Serie serie, Langage langage)
 		{
 			double pas = (double)100 / list.Count;
 			double progress = _loading.Dispatcher.Invoke(() => _loading.Progress.Value);
 			Parallel.ForEach(list, episodeNekoSama =>
 			{
-				Episode episode = new Episode(serie, episodeNekoSama.Num, type, episodeNekoSama.Url, episodeNekoSama.UrlImage);
+				Episode episode = new Episode(serie, episodeNekoSama.Num, langage, episodeNekoSama.Url, episodeNekoSama.UrlImage);
 				bool exist = false;
 
-				SQLiteDataReader liteDataReader = Data.GetData("select id, url from Episode where serie = @serie AND number = @number AND type = @type", new Dictionary<string, object> { { "@serie", serie.Id }, { "@number", episodeNekoSama.Num }, { "@type", type } });
+				SQLiteDataReader liteDataReader = Data.GetData("select id, url from Episode where serie = @serie AND number = @number AND type = @type", new Dictionary<string, object> { { "@serie", serie.Id }, { "@number", episodeNekoSama.Num }, { "@type", (int)langage } });
 
 				while(liteDataReader.Read())
 				{
@@ -192,13 +194,14 @@ namespace AnimeViewer.Utils
 						};
 						Data.SetData(sql, dictionary);
 						break;
+
 					case false:
 						sql = "INSERT INTO Episode (serie, number, type, url, urlImage) VALUES (@serie, @number, @type, @url, @urlImage);";
 						dictionary = new Dictionary<string, object>
 						{
 							{ "@serie", episode.Serie.Id },
 							{ "@number", episode.Number },
-							{ "@type", episode.Type },
+							{ "@type", episode.Langage },
 							{ "@url", episode.Url },
 							{ "@urlImage", episode.UrlImage }
 						};

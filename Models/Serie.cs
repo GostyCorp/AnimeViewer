@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
+using AnimeViewer.Utils;
 
 namespace AnimeViewer.Models
 {
@@ -30,10 +32,63 @@ namespace AnimeViewer.Models
 			Genre = genre;
 		}
 
-		public List<Episode> getEpisodes(Type type)
+		public static List<Serie> GetSeries(int limit, int lastLimit, Langage langage, string search = null)
 		{
-			string sql = $"SELECT * FROM Episode WHERE Serie = {Id} AND type = {type};";
-			return new List<Episode>();
+			List<Serie> series = new List<Serie>();
+			string sql = langage == Langage.Vf ? "SELECT * FROM Serie WHERE urlVF IS NOT NULL" : "SELECT * FROM Serie WHERE urlVostFr IS NOT NULL";
+			sql += search != null ? " AND (title LIKE @search OR titleEnglish LIKE @search OR titleRomanji LIKE @search OR titleFrench LIKE @search OR titleOther LIKE @search)" : "";
+			sql += " ORDER BY title limit @limit offset @lastLimit;";
+			Dictionary<string, object> dictionary = new Dictionary<string, object>()
+			{
+				{ "@limit", limit },
+				{ "@lastLimit", lastLimit }
+			};
+			if(search != null)
+				dictionary.Add("@search", $"%{search}%");
+			SQLiteDataReader data = Data.GetData(sql, dictionary);
+			while(data.Read())
+			{
+				series.Add(new Serie(
+						id: Convert.ToInt32(data["id"]),
+						title: data["title"].ToString(),
+						titleEnglish: data["titleEnglish"].ToString(),
+	                    titleRomanji: data["titleRomanji"].ToString(),
+	                    titleFrench: data["titleFrench"].ToString(),
+						titleOther: data["titleOther"].ToString(),
+	                    urlVf: data["urlVF"].ToString(),
+	                    urlVostFr: data["urlVostFr"].ToString(),
+						urlImage:  data["urlImage"].ToString(),
+	                    genre: data["genre"].ToString()
+					)
+				);
+			}
+			return series;
+		}
+
+		public static Serie GetSerie(int id)
+		{
+			Serie serie = null;
+			string sql = "SELECT * FROM Serie WHERE id = @id;";
+			Dictionary<string, object> dictionary = new Dictionary<string, object>()
+			{
+				{ "@id", id }
+			};
+			SQLiteDataReader data = Data.GetData(sql, dictionary);
+			while(data.Read())
+			{
+				serie = new Serie(
+					id: Convert.ToInt32(data["id"]),
+					title: data["title"].ToString(),
+					titleEnglish: data["titleEnglish"].ToString(),
+					titleRomanji: data["titleRomanji"].ToString(),
+					titleFrench: data["titleFrench"].ToString(),
+					titleOther: data["titleOther"].ToString(),
+					urlVf: data["urlVF"].ToString(),
+					urlVostFr: data["urlVostFr"].ToString(),
+					urlImage: data["urlImage"].ToString(),
+					genre: data["genre"].ToString());
+			}
+			return serie;
 		}
 	}
 }

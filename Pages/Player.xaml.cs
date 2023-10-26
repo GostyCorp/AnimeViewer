@@ -1,20 +1,23 @@
 using System;
+using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
-using System.Timers;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Threading;
+using AnimeViewer.Models;
 using Microsoft.Web.WebView2.Core;
+using WebView2 = Microsoft.Web.WebView2.Wpf.WebView2;
 
 namespace AnimeViewer.Pages
 {
-	public partial class Player : Page
+	public partial class Player
 	{
-		public Player(Uri url)
+		private readonly Episode _episode;
+		public Player(Uri url, Episode episode)
 		{
 			InitializeComponent();
 			AsyncInit();
 			PlayerWeb.Source = url;
+			_episode = episode;
 		}
 
 		private async void AsyncInit()
@@ -24,7 +27,7 @@ namespace AnimeViewer.Pages
 
 		private void Player_CoreWebView2InitializationCompleted(object sender, CoreWebView2InitializationCompletedEventArgs e)
 		{
-			PlayerWeb.CoreWebView2.AddHostObjectToScript("bridge", new PlayerJs(Application.Current.MainWindow as MainWindow));
+			PlayerWeb.CoreWebView2.AddHostObjectToScript("bridge", new PlayerJs(Application.Current.MainWindow as MainWindow, PlayerWeb, _episode));
 			PlayerWeb.CoreWebView2.NewWindowRequested += CoreWebView2_NewWindowRequested;
 		}
 
@@ -40,50 +43,8 @@ namespace AnimeViewer.Pages
 
 		private async void PlayerWeb_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
 		{
-			await PlayerWeb.CoreWebView2.ExecuteScriptAsync(@"
-				AnimeViewerJS = function()
-				{
-					// Fullscreen
-				    const bridge = chrome.webview.hostObjects.bridge;
-				    document.getElementsByClassName('jw-icon-fullscreen')[1].addEventListener('click', function()
-				    {
-				        bridge.FullScreenToggle();
-				    });
-					document.addEventListener('keydown', function(event)
-					{
-					    if(event.key === ""Escape"")
-						{
-					        bridge.FullScreenToggle();
-					    }
-					});
-					
-					// Remove ads
-					let anchorElements = document.body.querySelectorAll('a');
-					anchorElements.forEach(function(anchorElement)
-					{
-					    anchorElement.remove();
-					});
-					let scriptElements = document.body.querySelectorAll('script');
-					if(scriptElements.length > 0)
-					{
-					    scriptElements[scriptElements.length - 1].remove();
-					}
-					
-					// Auto play
-					jwplayer().play();
-					jwplayer().setVolume(50);
-				}
-				
-				for(let i = 0; i < 3; i++)
-				{
-					let time = i*1000+500;
-					setTimeout(function() 
-					{
-						if(jwplayer().getState() !== 'playing')
-							AnimeViewerJS();
-					}, time);
-				}
-		    ");
+			/* @lang JavaScript */
+			await PlayerWeb.CoreWebView2.ExecuteScriptAsync(File.ReadAllText("Script/player.js"));
 		}
 	}
 
@@ -92,10 +53,14 @@ namespace AnimeViewer.Pages
 	public class PlayerJs
 	{
 		private readonly MainWindow _window;
+		private readonly WebView2 _webView2;
+		private readonly Episode _episode;
 
-		public PlayerJs(MainWindow window)
+		public PlayerJs(MainWindow window, WebView2 webView2, Episode episode)
 		{
 			_window = window;
+			_webView2 = webView2;
+			_episode = episode;
 		}
 
 		public void FullScreenToggle()
@@ -105,6 +70,18 @@ namespace AnimeViewer.Pages
 			_window.Panel.Visibility = _window.WindowState == WindowState.Maximized ? Visibility.Hidden : Visibility.Visible;
 			_window.PageViewer.Margin = new Thickness(_window.WindowState == WindowState.Maximized ? 0 : 180, _window.WindowState == WindowState.Maximized ? 0 : 30, 0, 0);
 		}
+
+		public void SetVideoTime(string time, string maxTime)
+		{
+			History.SetHistory(episode: _episode, time: Convert.ToSingle(time), maxTime: Convert.ToSingle(maxTime));
+		}
+
+		public void GetVideoTime()
+		{
+			History history = History.GetHistory(episode: _episode);
+			if(history != null)
+				_webView2.CoreWebView2.PostWebMessageAsString(history.Time.ToString(CultureInfo.InvariantCulture));
+        }
 	}
 }
 

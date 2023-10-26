@@ -2,18 +2,16 @@
 using System.Windows;
 using System.Windows.Controls;
 using AnimeViewer.Models;
-using AnimeViewer.Utils;
-using Type = AnimeViewer.Models.Type;
 
 namespace AnimeViewer.Pages
 {
 	/// <summary>
 	/// Logique d'interaction pour ListAnimePage.xaml
 	/// </summary>
-	public partial class ListPage : Page
+	public partial class ListPage
 	{
-		public string Search { get; set; } = null;
-		private int _lastLimit = 0;
+		public string Search { get; set; }
+		private int _lastLimit;
 		private readonly ObservableCollection<Serie> _series = new ObservableCollection<Serie>();
 		private readonly MainWindow _main;
 
@@ -26,15 +24,15 @@ namespace AnimeViewer.Pages
 
 		private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
 		{
-			if(e.VerticalOffset / e.ExtentHeight <= 0.1)
+			if(e.VerticalOffset / e.ExtentHeight <= 0.7)
 				return;
 
 			LoadSeries();
 		}
 
-		public void LoadSeries(int limit = 30)
+		public void LoadSeries(int limit = 50)
 		{
-			Data.GetSeries(limit: limit, lastLimit: _lastLimit, type: _main.Type, search: Search).ForEach(serie => _series.Add(serie));
+			Serie.GetSeries(limit: limit, lastLimit: _lastLimit, langage: _main.Langage, search: Search).ForEach(serie => _series.Add(serie));
 			_lastLimit += limit;
 		}
 

@@ -7,7 +7,6 @@ using AnimeViewer.Pages;
 using AnimeViewer.Utils;
 using MessageBox = System.Windows.MessageBox;
 using TextBox = Wpf.Ui.Controls.TextBox;
-using Type = AnimeViewer.Models.Type;
 
 namespace AnimeViewer
 {
@@ -21,7 +20,7 @@ namespace AnimeViewer
 		public readonly EpisodeListPage EpisodeListPage;
 		private Player _player;
 
-		public Type Type { get; private set; } = Type.Vf;
+		public Langage Langage { get; private set; } = Models.Langage.Vf;
 
 		public MainWindow()
 		{
@@ -84,14 +83,14 @@ namespace AnimeViewer
 
 		public void CreatePlayer(int id)
 		{
-			Episode episode = Data.GetEpisode(id);
+			Episode episode = Episode.GetEpisode(id);
 			Uri.TryCreate(episode.Url, UriKind.Absolute, out Uri uriResult);
 			if(uriResult == null)
 			{
 				MessageBox.Show("La vidéo est indisponible", "Erreur de chargement vidéo", MessageBoxButton.OK, MessageBoxImage.Error);
 				return;
 			}
-			_player = new Player(uriResult);
+			_player = new Player(url: uriResult, episode: episode);
 			SwitchFrameView(FrameType.Player);
 		}
 
@@ -131,10 +130,10 @@ namespace AnimeViewer
 			switch(comboBox.SelectionBoxItem.ToString())
 			{
 				case "VostFr":
-					Type = Type.Vostfr;
+					Langage = Models.Langage.Vostfr;
 					break;
 				case "VF":
-					Type = Type.Vf;
+					Langage = Models.Langage.Vf;
 					break;
 			}
 

@@ -6,7 +6,7 @@ namespace AnimeViewer.Pages
 	/// <summary>
 	/// Logique d'interaction pour userPage.xaml
 	/// </summary>
-	public partial class UserPage : Page
+	public partial class UserPage
 	{
 		public UserPage()
 		{

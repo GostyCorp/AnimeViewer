@@ -2,7 +2,7 @@ using System.Windows;
 
 namespace AnimeViewer.Pages
 {
-	public partial class Loading : Window
+	public partial class Loading
 	{
 		public Loading()
 		{

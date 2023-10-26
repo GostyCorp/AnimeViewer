@@ -3,7 +3,7 @@ using System.Windows.Controls;
 
 namespace AnimeViewer.Pages
 {
-	public partial class FicheView : UserControl
+	public partial class FicheView
 	{
 		private readonly MainWindow _main;
 		public FicheView()
@@ -15,7 +15,7 @@ namespace AnimeViewer.Pages
         private async void Button_Click(object sender, RoutedEventArgs e)
 		{
 			_main.SwitchFrameView(MainWindow.FrameType.EpisodeList);
-			await _main.EpisodeListPage.LoadEpisodesAsync(id: (int)IdNumber.Value, _main.Type);
+			await _main.EpisodeListPage.LoadEpisodesAsync(id: (int)IdNumber.Value, _main.Langage);
 		}
     }
 }
