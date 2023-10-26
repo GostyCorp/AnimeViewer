@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimeViewer", "AnimeViewer.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimeViewerTest", "AnimeViewerTest\AnimeViewerTest.csproj", "{321BE1A3-2364-4ACC-B83B-BEDAAB810C1E}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup_AnimeViewer", "Setup_AnimeViewer\Setup_AnimeViewer.vdproj", "{A7CFD288-DF34-4503-B225-CB003CDF89A6}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

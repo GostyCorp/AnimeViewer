@@ -6,3 +6,6 @@ bin/
 obj/
 *.user
 packages/
+AnimeViewer.aip
+AnimeViewer-cache/
+AnimeViewer-SetupFiles/
