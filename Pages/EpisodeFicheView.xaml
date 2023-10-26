@@ -6,12 +6,14 @@
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              mc:Ignorable="d"
              d:DesignHeight="200"
-             d:DesignWidth="200">
+             d:DesignWidth="200"
+             Loaded="EpisodeFicheView_OnLoaded">
 	<Grid Width="200" Height="200">
 		<Button Click="Button_OnClick" Padding="0,0,0,0">
 			<StackPanel Orientation="Vertical" Height="200" Width="200" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#00000000">
-				<Image Source="{Binding UrlImage}" Width="200" Height="150" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10, 10, 10, 10" />
-				<Label Content="{Binding Number}" FontFamily="Century Gothic" FontSize="12" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="50" Foreground="#FFFDFDFD"/>
+				<Image Source="{Binding UrlImage}" Width="200" Height="150" />
+				<Label Content="{Binding Number}" FontFamily="Century Gothic" FontSize="12" VerticalContentAlignment="Center" HorizontalContentAlignment="Center" Height="30" Foreground="#FFFDFDFD"/>
+				<ProgressBar x:Name="Progress" Visibility="Hidden" Margin="5,5,5,0" Height="5" Foreground="#FF00FFE2" />
 				<ui:NumberBox x:Name="IdNumber" Text="{Binding Id}" TextWrapping="Wrap" Min="0" Max="100000" IntegersOnly="True" Visibility="Hidden" />
 			</StackPanel>
 		</Button>
