@@ -42,7 +42,7 @@ N'hésite pas à proposer des idées dans la section [Request Feature](https://g
 
 <!-- SECURITY -->
 ## Security
-![SECURITY.md](https://github.com/VeryOldpApY/AnimeViewer/blob/main/SECURITY.md)
+[SECURITY.md](https://github.com/VeryOldpApY/AnimeViewer/blob/main/SECURITY.md)
 
 <!-- CONTACT -->
 ## Contact
