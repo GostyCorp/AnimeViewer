@@ -40,6 +40,10 @@ Application uniquement disponible sur Windows actuellement.
   
 N'hésite pas à proposer des idées dans la section [Request Feature](https://github.com/VeryOldpApY/AnimeViewer/issues).
 
+<!-- SECURITY -->
+## Security
+![SECURITY.md](https://github.com/VeryOldpApY/AnimeViewer/blob/main/SECURITY.md)
+
 <!-- CONTACT -->
 ## Contact
 
